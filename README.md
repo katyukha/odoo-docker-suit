@@ -8,8 +8,9 @@ To run this suit You have following components installed on Your system:
 - [Fig](http://www.fig.sh/index.html)
 
 To start suit do next steps:
-1. Clone this repository
-2. Go inside clon
+
+1. Clone this repository: ```git clone https://github.com/katyukha/odoo-docker-suit.git```
+2. Go inside clon ```cd odoo-docker-suit```
 3. Run command: ```fig up```
 4. Look *localhost:8069* for *Odoo 8.0* and *localhost:9069* for *Odoo latest*
 
