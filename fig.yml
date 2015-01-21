@@ -1,0 +1,61 @@
+dbDATA:
+  image: xcgd/postgresql
+  volumes:
+    - /var/lib/postgresql
+    - /var/log/postgresql
+    - /etc/postgresql
+  entrypoint: false
+  command: false
+
+odoo8DATA:
+  image: xcgd/odoo:8.0
+  volumes:
+   - /opt/odoo/etc
+   - ./additional_addons/8.0/:/opt/odoo/additional_addons
+   - /opt/odoo/data
+  entrypoint: false
+  command: false
+
+
+odoolatestDATA:
+  image: xcgd/odoo:latest
+  volumes:
+   - /opt/odoo/etc
+   - ./additional_addons/latest/:/opt/odoo/additional_addons
+   - /opt/odoo/data
+  entrypoint: false
+  command: false
+
+#aeroocker:
+  #image: rvalyi/aeroocker
+
+db:
+  image: xcgd/postgresql
+  volumes_from:
+    - dbDATA
+
+o8:
+  image: xcgd/odoo:8.0
+  links:
+    - "db"
+    - "odoo8DATA"
+    #- "aeroocker"
+  volumes_from:
+    - odoo8DATA
+  ports:
+    - "8069:8069"
+    - "8072:8072"
+  command: "start"
+
+olatest:
+  image: xcgd/odoo:latest
+  links:
+    - "db"
+    - "odoolatestDATA"
+    #- "aeroocker"
+  volumes_from:
+    - odoolatestDATA
+  ports:
+    - "9069:8069"
+    - "9072:8072"
+  command: "start"
