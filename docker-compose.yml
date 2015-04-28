@@ -7,6 +7,15 @@ dbDATA:
   entrypoint: false
   command: false
 
+odoo7DATA:
+  image: xcgd/odoo:7.0
+  volumes:
+   - /opt/odoo/etc
+   - ./additional_addons/7.0/:/opt/odoo/additional_addons
+   - /opt/odoo/data
+  entrypoint: false
+  command: false
+
 odoo8DATA:
   image: xcgd/odoo:8.0
   volumes:
@@ -33,6 +42,19 @@ db:
   image: xcgd/postgresql
   volumes_from:
     - dbDATA
+
+o7:
+  image: xcgd/odoo:7.0
+  links:
+    - "db"
+    - "odoo7DATA"
+    #- "aeroocker"
+  volumes_from:
+    - odoo7DATA
+  ports:
+    - "7069:8069"
+    - "7072:8072"
+  command: "start"
 
 o8:
   image: xcgd/odoo:8.0
