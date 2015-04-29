@@ -30,4 +30,17 @@ Available odoo instance:
     * o8: Odoo 8.0
     * olatest: Odoo latest
 
+Also it is possible to run tests of third-party addons in dockered environment,
+which makes available using this project in CI. For this feature look at folowing
+bash scripts:
 
+    * odoo-helper.bash
+    * docker-test.bash
+
+Example:
+
+```bash
+./docker-test.bash 7.0 https://github.com/katyukha/base_tags.git master base_tags product_tags
+```
+
+Note, that this feature will change in future
