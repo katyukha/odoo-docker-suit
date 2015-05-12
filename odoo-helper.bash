@@ -21,27 +21,70 @@
 SCRIPT=$0;
 SCRIPT_NAME=`basename $SCRIPT`;
 F=`readlink -f $SCRIPT`;  # full script path;
+WORKDIR=`pwd`;
 
 REQUIREMENTS_FILE_NAME="odoo_requirements.txt";
+CONF_FILE_NAME="odoo-helper.conf";
 
 set -e;
 
+# search_file_up <start path> <file name>
+function search_file_up {
+    local path=$1;
+    while [[ "$path" != "/" ]];
+    do
+        if [ -e "$path/$2" ]; then
+            echo "$path/$2";
+            return 0;
+        fi
+        path=`dirname $path`;
+    done
+}
+
+# load_conf <conf file> <conf file> ...
+function load_conf {
+    for conf_file in $@; do
+        if [ -f $conf_file ]; then
+            source $conf_file;
+        fi
+    done
+}
+
+load_conf "/etc/default/$CONF_FILE_NAME"\
+          "$HOME/$CONF_FILE_NAME"\
+          `search_file_up $WORKDIR $CONF_FILE_NAME`;
+
 function print_usage {
-    echo "Usage:";
-    echo "    $SCRIPT_NAME [global options] command [command options]";
-    echo "";
-    echo "Available commands:";
-    echo "    fetch_module";
-    echo "    fetch_requirements <file name>";
-    echo "";
-    echo "Global options:";
-    echo "    --addons_dir <addons_directory>";
-    echo "    --downloads_dir <downloads_directory";
-    echo "    --virtual_env <virtual_env_dir>  - optional, if specified, python dependencies"
-    echo "                                       will be installed in that virtual env";
-    echo "    --use_copy                       - if set, then downloaded modules, repositories will"
-    echo "                                       be copied instead of being symlinked";
-    echo "";
+    echo "Usage:
+        $SCRIPT_NAME [global options] command [command options]
+
+    Available commands:
+        fetch_module [--help]
+        link_module <repo_path> <addons_dir> [<module_name>]
+        fetch_requirements <file name>
+    
+    Global options:
+        --addons_dir <addons_directory>
+        --downloads_dir <downloads_directory
+        --virtual_env <virtual_env_dir>  - optional, if specified, python dependencies
+                                           will be installed in that virtual env
+        --use_copy                       - if set, then downloaded modules, repositories will
+                                           be copied instead of being symlinked
+
+    Also global options may be set up using configuration files.
+    Folowing wile paths will be searched for file $CONF_FILE_NAME:
+
+        - /etc/default/$CONF_FILE_NAME  - Default conf. there may be some general settings placed
+        - $HOME/$CONF_FILE_NAME         - User specific oconf  (overwrites previous conf)
+        - Project specific conf         - File $CONF_FILE_NAME will be searched in $WORKDIR and all parent
+                                          directories. First one found will be used
+
+    Available env options:
+        DOWNLOADS_DIR                   - Directory where all downloads hould be placed
+        ADDONS_DIR                      - directory to place addons fetched (thats one in odoo's addons_path)
+        VENV_DIR                        - Directory of virtual environment, if virtualenv is used
+        USE_COPY                        - If set, then addons will be coppied in addons dir, instead of standard symlinking
+"
 }
 
 # fetch_requirements <file_name>
@@ -242,13 +285,13 @@ function fetch_module {
 #    echo "Running test_module with arguments: $@";
 #}
 
-if [[ $# -lt 2 ]]; then
+if [[ $# -lt 1 ]]; then
     echo "No options/commands supplied $#: $@";
     print_usage;
     exit 0;
 fi
 
-while [[ $# -gt 1 ]]
+while [[ $# -gt 0 ]]
 do
     key="$1";
     case $key in
@@ -278,6 +321,11 @@ do
         ;;
         fetch_requirements)
             fetch_requirements $2;
+            exit;
+        ;;
+        link_module)
+            shift;
+            link_module $@
             exit;
         ;;
 #        test_module)
